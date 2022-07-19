@@ -298,6 +298,33 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         }
       }
 
+      // Dynamics parameters
+      if (thrusterSDF->HasElement("DynamicsType"))
+      {
+        thruster.DynamicsType = thrusterSDF->Get<int>("dynamicsType");
+        ROS_DEBUG_STREAM("Parameter found - setting <dynamicsType> to <" <<
+          thruster.dynamicsType << ">.");
+      }
+      else
+      {
+        thruster.dynamicsType = 0;
+        ROS_INFO_STREAM("Parameter <dynamicsType> not found: "
+          "Using default value of <" << thruster.dynamicsType << ">.");
+      }
+
+      if (thruster.dynamicsType == 1)
+      {
+        double timeConstant = thrusterSDF->SdfParamDouble(thrusterSDF,
+                                                          "timeConstant",
+                                                          1);
+        // TODO
+        if (timeConstant >= 0)
+          ROS_FATAL_STREAM("timeConstant must be greater than 0!");
+
+        thruster.timeConstant = timeConstant;
+      }
+
+
       // Push to vector and increment
       this->thrusters.push_back(thruster);
       thrusterSDF = thrusterSDF->GetNextElement("thruster");
